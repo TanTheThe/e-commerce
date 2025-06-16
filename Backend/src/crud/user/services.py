@@ -116,7 +116,7 @@ class UserService:
     async def verify_user_account_service(self, token: str, session: AsyncSession):
         token_data = decode_url_safe_token(token, role="customer")
         if token_data is None:
-            AuthException.token_invalid()
+            AuthException.authentication_error()
 
         user_email = token_data.get('email')
 
@@ -129,9 +129,7 @@ class UserService:
 
             await user_repository.update_user(user, {'is_verified': True, "is_customer": True}, session)
 
-            return JSONResponse(content={
-                "message": "Xác thực tài khoản thành công"
-            }, status_code=status.HTTP_200_OK)
+            return True
 
         AuthException.authentication_error()
 

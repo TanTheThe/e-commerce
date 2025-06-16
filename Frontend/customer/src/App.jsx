@@ -11,7 +11,7 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { createContext } from 'react'
 import ProductZoom from './components/ProductZoom'
 import React from 'react'
@@ -27,6 +27,7 @@ import Checkout from './Pages/Checkout'
 import MyAccount from './Pages/MyAccount'
 import MyList from './Pages/MyList'
 import Orders from './Pages/Orders'
+import { fetchDataFromApi, fetchWithAutoRefresh } from './utils/api'
 
 
 const MyContext = createContext()
@@ -35,7 +36,8 @@ function App() {
   const [openProductDetailsModal, setOpenProductDetailsModal] = useState(false);
   const [maxWidth, setMaxWidth] = useState('lg');
   const [fullWidth, setFullWidth] = useState(true);
-  const [isLogin, setIsLogin] = useState(true)
+  const [isLogin, setIsLogin] = useState(false)
+  const [userData, setUserData] = useState(null)
 
   const [openCartPanel, setOpenCartPanel] = useState(false);
 
@@ -48,13 +50,38 @@ function App() {
   };
 
   const openAlertBox = (status, msg) => {
-    if(status === "success"){
+    if (status === "success") {
       toast.success(msg)
     }
-    if(status === "error"){
+    if (status === "error") {
       toast.error(msg)
     }
   }
+
+  useEffect(() => {
+    const checkLogin = async () => {
+      const token = localStorage.getItem("accesstoken");
+
+      if (token) {
+        const response = await fetchWithAutoRefresh("/customer/user", "GET");
+
+        if (response?.success) {
+          setIsLogin(true);
+          setUserData(response.data);
+        } else {
+          setIsLogin(false);
+          setUserData(null);
+          localStorage.removeItem("accesstoken");
+          localStorage.removeItem("refreshtoken");
+        }
+      } else {
+        setIsLogin(false);
+        setUserData(null);
+      }
+    };
+
+    checkLogin();
+  }, [])
 
 
   const values = {
@@ -64,7 +91,9 @@ function App() {
     toggleCartPanel,
     openAlertBox,
     isLogin,
-    setIsLogin
+    setIsLogin,
+    setUserData,
+    userData
   }
 
   return (
@@ -76,7 +105,7 @@ function App() {
             <Route path={"/"} exact={true} element={<Home />} />
             <Route path={"/productListing"} exact={true} element={<ProductListing />} />
             <Route path={"/product/:id"} exact={true} element={<ProductDetails />} />
-            <Route path={"/login"} exact={true} element={<Login />} />
+            <Route path={"/login"} element={<Login />} />
             <Route path={"/signup"} exact={true} element={<Register />} />
             <Route path={"/cart"} exact={true} element={<CartPage />} />
             <Route path={"/verify"} exact={true} element={<Verify />} />
@@ -90,7 +119,7 @@ function App() {
         </MyContext.Provider>
       </BrowserRouter>
 
-      <Toaster/>
+      <Toaster />
 
       <Dialog
         fullWidth={fullWidth}
@@ -117,7 +146,7 @@ function App() {
         </DialogContent>
       </Dialog>
 
-      
+
     </>
   )
 }

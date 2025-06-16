@@ -5,7 +5,6 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from sqlmodel import select, desc
 from datetime import datetime
 import time
-
 from src.errors.special_offer import SpecialOfferException
 
 

@@ -7,7 +7,7 @@ import TextField from '@mui/material/TextField';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import Button from "@mui/material/Button";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { postData } from "../../utils/api";
 import { MyContext } from "../../App";
@@ -15,7 +15,6 @@ import { CircularProgress } from "@mui/material";
 import { BsCheckLg } from "react-icons/bs";
 
 const Register = () => {
-    const [isLoading, setIsLoading] = useState(false)
     const [isShowPassword, setIsShowPassword] = useState(false)
     const [formFields, setFormFields] = useState({
         first_name: "",
@@ -40,8 +39,6 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-
-        setIsLoading(true)
 
         if (formFields.first_name === "") {
             context.openAlertBox(
@@ -72,12 +69,10 @@ const Register = () => {
         }
 
         const response = await postData("/customer/user/signup", formFields);
-        console.log(response);
 
         if (response?.success === true) {
-            setIsLoading(false)
             context.openAlertBox(
-                "success", response?.messages
+                "success", response?.data?.messages
             )
             setFormFields({
                 first_name: "",
@@ -87,7 +82,6 @@ const Register = () => {
             })
         } else {
             context.openAlertBox("error", response?.data?.detail?.message)
-            setIsLoading(false)
         }
     }
 
@@ -100,19 +94,19 @@ const Register = () => {
                     <form className="w-full mt-5" onSubmit={handleSubmit}>
                         <div className="form-group w-full mb-5">
                             <TextField type="text" id="first_name" name="first_name" value={formFields.first_name} label="First name" variant="outlined" className="w-full"
-                                onChange={onChangeInput} disabled={isLoading === true ? true : false} />
+                                onChange={onChangeInput}/>
                         </div>
                         <div className="form-group w-full mb-5">
                             <TextField type="text" id="last_name" name="last_name" value={formFields.last_name} label="Last name" variant="outlined" className="w-full"
-                                onChange={onChangeInput} disabled={isLoading === true ? true : false} />
+                                onChange={onChangeInput}/>
                         </div>
                         <div className="form-group w-full mb-5">
                             <TextField type="email" id="email" name="email" value={formFields.email} label="Email *" variant="outlined" className="w-full"
-                                onChange={onChangeInput} disabled={isLoading === true ? true : false} />
+                                onChange={onChangeInput}/>
                         </div>
                         <div className="form-group w-full mb-5 relative">
                             <TextField type={isShowPassword === false ? "password" : "text"} id="password" name="password" value={formFields.password} label="Password *" variant="outlined" className="w-full"
-                                onChange={onChangeInput} disabled={isLoading === true ? true : false} />
+                                onChange={onChangeInput}/>
                             <Button className="!absolute top-[10px] right-[10px] z-50 !w-[35px] !h-[35px] !min-w-[35px]
                             !rounded-full !text-black" onClick={() => setIsShowPassword(!isShowPassword)}>
                                 {
@@ -124,13 +118,8 @@ const Register = () => {
                         </div>
 
                         <div className="flex items-center w-full mt-3 mb-3">
-                            <Button type="submit" disabled={!validateValue} className="btn-org btn-lg w-full flex gap-3">
-                                {
-                                    isLoading === true ?
-                                        <CircularProgress color="inherit" />
-                                        :
-                                        'Register'
-                                }
+                            <Button type="submit" className="btn-org btn-lg w-full flex gap-3">
+                                Register
                             </Button>
                         </div>
 
