@@ -67,10 +67,12 @@ async def forget_password_confirm(token: str, data: PasswordResetConfirmModel,
     return JSONResponse(content={"message": message}, status_code=200)
 
 
-@auth_customer_router.get("/forgot-password/{token}")
-async def verify_reset_token(token: str):
+@auth_customer_router.get("/forgot-password/verify-otp")
+async def verify_otp(otp, email, session: AsyncSession = Depends(get_session)):
+    token = await auth_service.verify_otp(otp, email, "customer", session)
+
     return JSONResponse(
-        content={"message": "Token hợp lệ hoặc đang xử lý, vui lòng chuyển đến trang nhập mật khẩu mới"},
+        content={"token": token},
         status_code=status.HTTP_200_OK
     )
 

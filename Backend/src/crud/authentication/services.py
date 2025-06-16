@@ -212,46 +212,39 @@ class AuthenticationService:
 
     async def forgot_password_confirm_service(self, data, token: str, role: str,
                                             session: AsyncSession):
-        check = data.check.lower()
+        token_data = decode_url_safe_token(token, role)
 
-        if data.new_password != data.confirm_new_password:
-            AuthException.password_mismatch()
+        user_email = token_data.get("email")
+        if not user_email:
+            AuthException.token_invalid()
 
-        if check == "email":
-            if not token:
-                AuthException.token_missing()
-
-            token_data = decode_url_safe_token(token, role)
-            user_email = token_data.get("email")
-            if not user_email:
-                AuthException.token_invalid()
-
-            condition = and_(User.email == user_email)
-            user = await user_repository.get_user(condition, session)
-            if not user:
-                AuthException.user_not_found()
-
-        elif check == "otp":
-            condition = and_(User.email == data.email)
-            user = await user_repository.get_user(condition, session)
-            if not user:
-                AuthException.user_not_found()
-
-            if user.otp != data.otp:
-                AuthException.invalid_otp()
-
-            if not user.expires_at or datetime.utcnow() > user.expires_at:
-                AuthException.otp_expired()
-
-            user.otp = None
-            user.expires_at = None
-
-        else:
-            AuthException.invalid_check_option()
-            return
+        condition = and_(User.email == user_email)
+        user = await user_repository.get_user(condition, session)
+        if not user:
+            AuthException.user_not_found()
 
         password_hash = generate_password_hash(data.new_password)
         await user_repository.update_user(user, {'password': password_hash}, session)
         await session.commit()
 
         return "Đổi mật khẩu thành công"
+
+
+    async def verify_otp(self, otp: str, email, role, session: AsyncSession):
+        condition = and_(User.email == email)
+        user = await user_repository.get_user(condition, session)
+        if not user:
+            AuthException.user_not_found()
+
+        if user.otp != otp:
+            AuthException.invalid_otp()
+
+        if not user.expires_at or datetime.utcnow() > user.expires_at:
+            AuthException.otp_expired()
+
+        user.otp = None
+        user.expires_at = None
+
+        token = create_url_safe_token({"email": email}, role)
+
+        return token

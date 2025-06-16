@@ -9,7 +9,7 @@ import Button from "@mui/material/Button";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
-import { postData } from "../../utils/api";
+import { postDataApi } from "../../utils/api";
 import { MyContext } from "../../App";
 import { CircularProgress } from "@mui/material";
 import { BsCheckLg } from "react-icons/bs";
@@ -68,7 +68,7 @@ const Register = () => {
             return false
         }
 
-        const response = await postData("/customer/user/signup", formFields);
+        const response = await postDataApi("/customer/user/signup", formFields);
 
         if (response?.success === true) {
             context.openAlertBox(
@@ -94,19 +94,19 @@ const Register = () => {
                     <form className="w-full mt-5" onSubmit={handleSubmit}>
                         <div className="form-group w-full mb-5">
                             <TextField type="text" id="first_name" name="first_name" value={formFields.first_name} label="First name" variant="outlined" className="w-full"
-                                onChange={onChangeInput}/>
+                                onChange={onChangeInput} />
                         </div>
                         <div className="form-group w-full mb-5">
                             <TextField type="text" id="last_name" name="last_name" value={formFields.last_name} label="Last name" variant="outlined" className="w-full"
-                                onChange={onChangeInput}/>
+                                onChange={onChangeInput} />
                         </div>
                         <div className="form-group w-full mb-5">
                             <TextField type="email" id="email" name="email" value={formFields.email} label="Email *" variant="outlined" className="w-full"
-                                onChange={onChangeInput}/>
+                                onChange={onChangeInput} />
                         </div>
                         <div className="form-group w-full mb-5 relative">
                             <TextField type={isShowPassword === false ? "password" : "text"} id="password" name="password" value={formFields.password} label="Password *" variant="outlined" className="w-full"
-                                onChange={onChangeInput}/>
+                                onChange={onChangeInput} />
                             <Button className="!absolute top-[10px] right-[10px] z-50 !w-[35px] !h-[35px] !min-w-[35px]
                             !rounded-full !text-black" onClick={() => setIsShowPassword(!isShowPassword)}>
                                 {
