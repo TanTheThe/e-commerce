@@ -4,7 +4,8 @@ from src.dependencies import AccessTokenBearer, RefreshTokenBearer
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.crud.authentication.utils import create_access_token
 from fastapi.responses import JSONResponse
-from src.schemas.user import UserLoginModel, UserLoginAdminModel, PasswordResetConfirmModel, PasswordResetEmailModel
+from src.schemas.user import UserLoginModel, UserLoginAdminModel, PasswordResetConfirmModel, PasswordResetEmailModel, \
+    VerifyOTPModel
 from src.database.main import get_session
 from datetime import datetime
 from src.crud.authentication.services import AuthenticationService
@@ -67,9 +68,9 @@ async def forget_password_confirm(token: str, data: PasswordResetConfirmModel,
     return JSONResponse(content={"message": message}, status_code=200)
 
 
-@auth_customer_router.get("/forgot-password/verify-otp")
-async def verify_otp(otp, email, session: AsyncSession = Depends(get_session)):
-    token = await auth_service.verify_otp(otp, email, "customer", session)
+@auth_customer_router.post("/forgot-password/verify-otp")
+async def verify_otp(data: VerifyOTPModel, session: AsyncSession = Depends(get_session)):
+    token = await auth_service.verify_otp(data, "customer", session)
 
     return JSONResponse(
         content={"token": token},
@@ -93,10 +94,12 @@ async def forget_password_confirm(token: str, data: PasswordResetConfirmModel,
     return JSONResponse(content={"message": message}, status_code=200)
 
 
-@auth_admin_router.get("/forgot-password/{token}")
-async def verify_reset_token(token: str):
+@auth_admin_router.post("/forgot-password/verify-otp")
+async def verify_otp(data: VerifyOTPModel, session: AsyncSession = Depends(get_session)):
+    token = await auth_service.verify_otp(data, "admin", session)
+
     return JSONResponse(
-        content={"message": "Token hợp lệ hoặc đang xử lý, vui lòng chuyển đến trang nhập mật khẩu mới"},
+        content={"token": token},
         status_code=status.HTTP_200_OK
     )
 

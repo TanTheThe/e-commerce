@@ -20,31 +20,6 @@ const Verify = () => {
     const navigate = useNavigate();
 
     return (
-        // <section className="section py-10">
-        //     <div className="container">
-        //         <div className="card shadow-md w-[450px] m-auto rounded-md bg-white p-5 px-10">
-        //             <div className="text-center flex items-center justify-center">
-        //                 <img src="https://cdn-icons-png.flaticon.com/128/7182/7182972.png" width="80" />
-        //             </div>
-        //             <h3 className="text-center text-[18px] text-black mt-4">Verify OTP</h3>
-
-        //             <p className="text-center mt-0 mb-4">OTP send to <span className="text-[#ff5252] font-bold">
-        //                 the63574@gmail.com</span></p>
-
-        //             <form onSubmit={verifyOTP}>
-        //                 <OtpBox length={6} onChange={handleOtpChange} />
-
-        //                 <div className="flex items-center justify-between mt-5 px-3">
-        //                     <Button type="submit" className="w-full btn-org btn-lg">Verify OTP</Button>
-        //                 </div>
-        //             </form>
-
-
-        //         </div>
-        //     </div>
-        // </section>
-        
-
         <div className="min-h-120 bg-gray-100 flex flex-col items-center justify-center p-4">
             <h1 className="text-4xl font-bold mb-4 text-gray-800">QUÊN MẬT KHẨU?</h1>
             <p className="text-center text-gray-600 max-w-xl mb-8">

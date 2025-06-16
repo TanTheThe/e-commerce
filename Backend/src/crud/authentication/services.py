@@ -230,13 +230,13 @@ class AuthenticationService:
         return "Đổi mật khẩu thành công"
 
 
-    async def verify_otp(self, otp: str, email, role, session: AsyncSession):
-        condition = and_(User.email == email)
+    async def verify_otp(self, data, role, session: AsyncSession):
+        condition = and_(User.email == data.email)
         user = await user_repository.get_user(condition, session)
         if not user:
             AuthException.user_not_found()
 
-        if user.otp != otp:
+        if user.otp != data.otp:
             AuthException.invalid_otp()
 
         if not user.expires_at or datetime.utcnow() > user.expires_at:
@@ -245,6 +245,6 @@ class AuthenticationService:
         user.otp = None
         user.expires_at = None
 
-        token = create_url_safe_token({"email": email}, role)
+        token = create_url_safe_token({"email": data.email}, role)
 
         return token

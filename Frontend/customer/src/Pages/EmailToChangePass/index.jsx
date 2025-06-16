@@ -1,13 +1,14 @@
-// src/pages/ResetPasswordEmail.tsx
 import React, { useContext, useState } from "react";
 import { postDataApi } from "../../utils/api";
 import { MyContext } from "../../App";
 import { CircularProgress } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
-const ResetPasswordEmail = () => {
+const EmailToChangePass = () => {
     const [email, setEmail] = useState("");
     const context = useContext(MyContext)
     const [isLoading, setIsLoading] = useState(false)
+    const navigate = useNavigate();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -21,13 +22,14 @@ const ResetPasswordEmail = () => {
 
         const response = await postDataApi("/customer/auth/forgot-password", {
             email,
-            check: "email"
+            check: "otp"
         });
 
         if (response?.success === true) {
             context.openAlertBox(
-                "success", "Please visit your email to receive the link"
+                "success", "Please visit your email to get otp"
             )
+            navigate("/forgot-password-otp", { state: { email } });
         } else {
             context.openAlertBox("error", response?.data?.detail?.message)
         }
@@ -37,9 +39,9 @@ const ResetPasswordEmail = () => {
 
     return (
         <div className="min-h-120 bg-gray-100 flex flex-col items-center justify-center px-4">
-            <h1 className="text-3xl font-bold mb-4">Reset Your Password</h1>
+            <h1 className="text-3xl font-bold mb-1">Reset Your Password</h1>
             <p className="text-gray-700 mb-6 text-center max-w-md">
-                Lost your password? Please enter your email address. You will receive a link to create a new password via email.
+                Please provide the email you will receive the otp
             </p>
             <form onSubmit={handleSubmit} className="w-full max-w-md">
                 <label htmlFor="email" className="block mb-2 font-medium text-sm">
@@ -58,11 +60,11 @@ const ResetPasswordEmail = () => {
                     disabled={!email || isLoading}
                     className={`w-full flex items-center justify-center bg-blue-600 text-white px-4 py-2 rounded transition hover:bg-blue-700 ${(!email || isLoading) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
                 >
-                    {isLoading ? <CircularProgress size={24} color="inherit" /> : "RESET PASSWORD"}
+                    {isLoading ? <CircularProgress size={24} color="inherit" /> : "SEND OTP"}
                 </button>
             </form>
         </div>
     );
 };
 
-export default ResetPasswordEmail;
+export default EmailToChangePass;

@@ -29,6 +29,8 @@ import MyList from './Pages/MyList'
 import Orders from './Pages/Orders'
 import { getDataApi, fetchWithAutoRefresh } from './utils/api'
 import ResetPasswordEmail from './Pages/ResetPasswordEmail'
+import ResetPasswordOtp from './Pages/ResetPasswordOtp'
+import EmailToChangePass from './Pages/EmailToChangePass'
 
 
 const MyContext = createContext()
@@ -117,6 +119,8 @@ function App() {
             <Route path={"/my-list"} exact={true} element={<MyList />} />
             <Route path={"/my-orders"} exact={true} element={<Orders />} />
             <Route path={"/forgot-password-email"} element={<ResetPasswordEmail />} />
+            <Route path={"/forgot-password-otp"} element={<ResetPasswordOtp />} />
+            <Route path={"/send-mail"} element={<EmailToChangePass />} />
           </Routes>
           <Footer />
         </MyContext.Provider>

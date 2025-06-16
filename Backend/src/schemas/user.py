@@ -75,4 +75,8 @@ class ChangePasswordModel(BaseModel):
     new_password: str
     confirm_new_password: str
 
+class VerifyOTPModel(BaseModel):
+    otp: str
+    email: str
+
 
