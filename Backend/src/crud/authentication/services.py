@@ -94,7 +94,7 @@ class AuthenticationService:
                     return JSONResponse(
                         content={
                             "messages": "Đăng nhập thành công",
-                            "access token": access_token,
+                            "access_token": access_token,
                             "refresh_token": refresh_token,
                             "user": {
                                 "email": user.email,
@@ -147,7 +147,7 @@ class AuthenticationService:
                     return JSONResponse(
                         content={
                             "messages": "Đăng nhập thành công",
-                            "access token": access_token,
+                            "access_token": access_token,
                             "refresh_token": refresh_token,
                             "user": {
                                 "email": user.email,

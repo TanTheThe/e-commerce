@@ -16,6 +16,7 @@ import { MyContext } from "../../App";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { IoBagCheckOutline } from "react-icons/io5";
+import { fetchDataFromApi, fetchWithAutoRefresh, postData } from "../../utils/api";
 
 
 const Header = () => {
@@ -26,8 +27,24 @@ const Header = () => {
         setAnchorEl(event.currentTarget);
     };
     const handleClose = () => {
-        setAnchorEl(null);
+        setAnchorEl(null)
     };
+
+    const logout = async () => {
+        setAnchorEl(null)
+        const response = await fetchWithAutoRefresh("/customer/auth/logout", "GET")
+
+        console.log(response)
+
+
+        if (response?.success === true) {
+            context.setIsLogin(false)
+            localStorage.removeItem("accesstoken")
+            localStorage.removeItem("refreshtoken")
+        }
+    }
+
+    console.log(context?.userData)
 
     return (
         <header className="bg-white">
@@ -77,8 +94,12 @@ const Header = () => {
                                             </Button>
 
                                             <div className="info flex flex-col">
-                                                <h4 className="leading-3 text-[14px] text-[rgba(0,0,0,0.6)] font-[500] mb-0 capitalize text-left justify-start">Rinku Verma</h4>
-                                                <span className="text-[13px] text-[rgba(0,0,0,0.6)] font-[400] capitalize text-left justify-start">rinkuv.planet@gmail.com</span>
+                                                <h4 className="leading-3 text-[14px] text-[rgba(0,0,0,0.6)] font-[500] mb-0 capitalize text-left justify-start">
+                                                    {context?.userData.content.first_name} {context?.userData.content.last_name}
+                                                </h4>
+                                                <span className="text-[13px] text-[rgba(0,0,0,0.6)] font-[400] capitalize text-left justify-start">
+                                                    {context?.userData.content.email}
+                                                </span>
                                             </div>
                                         </Button>
 
@@ -137,7 +158,7 @@ const Header = () => {
                                                 </MenuItem>
                                             </Link>
 
-                                            <MenuItem onClick={handleClose} className="flex gap-2 !py-2">
+                                            <MenuItem onClick={logout} className="flex gap-2 !py-2">
                                                 <IoIosLogOut className="text-[18px]" /> <span className="text-[14px]">Logout</span>
                                             </MenuItem>
                                         </Menu>

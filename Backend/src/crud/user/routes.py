@@ -6,6 +6,8 @@ from src.database.main import get_session
 from src.crud.user.services import UserService
 from fastapi.responses import JSONResponse
 from src.dependencies import admin_role_middleware, customer_role_middleware
+from fastapi.responses import RedirectResponse
+
 
 user_service = UserService()
 access_token_bearer = AccessTokenBearer()
@@ -30,7 +32,11 @@ async def create_user_account(user_data: UserCreateModel, bg_tasks: BackgroundTa
 
 @user_customer_router.get('/verify/{token}')
 async def verify_user_account(token: str, session:AsyncSession = Depends(get_session)):
-    return await user_service.verify_user_account_service(token, session)
+    try:
+        await user_service.verify_user_account_service(token, session)
+        return RedirectResponse(url="http://localhost:5173/login?verified=true", status_code=302)
+    except Exception:
+        return RedirectResponse(url="http://localhost:5173/login?verified=false", status_code=302)
 
 
 @user_customer_router.put('/', dependencies=[Depends(customer_role_middleware)])
