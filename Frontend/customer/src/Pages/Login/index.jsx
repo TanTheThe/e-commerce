@@ -10,7 +10,7 @@ import { IoMdEye, IoMdEyeOff } from "react-icons/io";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { MyContext } from "../../App";
-import { postData } from "../../utils/api";
+import { postDataApi } from "../../utils/api";
 import { CircularProgress } from "@mui/material";
 
 const Login = () => {
@@ -57,10 +57,11 @@ const Login = () => {
             return false
         }
 
-        const response = await postData("/customer/auth/login", formFields);
+        const response = await postDataApi("/customer/auth/login", formFields);
         console.log(response)
 
         if (response?.success === true) {
+            console.log(response);
             setIsLoading(false)
             context.openAlertBox(
                 "success", response?.data?.messages
@@ -78,6 +79,7 @@ const Login = () => {
 
             history("/")
         } else {
+            setIsLoading(false)
             context.openAlertBox("error", response?.data?.detail?.message)
         }
     }
@@ -95,7 +97,7 @@ const Login = () => {
         }
     }, [verified]);
 
-    
+
 
     return (
         <section className="section py-10">
@@ -127,8 +129,8 @@ const Login = () => {
                             <Button type="submit" disabled={!validateValue} className="btn-org btn-lg w-full">
                                 {
                                     isLoading === true ? <CircularProgress color="inherit" />
-                                    :
-                                    'Login'
+                                        :
+                                        'Login'
                                 }
                             </Button>
                         </div>

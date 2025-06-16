@@ -22,12 +22,13 @@ import Register from './Pages/Register'
 import CartPage from './Pages/Cart'
 import Verify from './Pages/Verify'
 import toast, { Toaster } from 'react-hot-toast';
-import ForgotPassword from './Pages/ForgotPassword'
+import ChangePassword from './Pages/ChangePassword'
 import Checkout from './Pages/Checkout'
 import MyAccount from './Pages/MyAccount'
 import MyList from './Pages/MyList'
 import Orders from './Pages/Orders'
-import { fetchDataFromApi, fetchWithAutoRefresh } from './utils/api'
+import { getDataApi, fetchWithAutoRefresh } from './utils/api'
+import ResetPasswordEmail from './Pages/ResetPasswordEmail'
 
 
 const MyContext = createContext()
@@ -64,6 +65,7 @@ function App() {
 
       if (token) {
         const response = await fetchWithAutoRefresh("/customer/user", "GET");
+        console.log(response);
 
         if (response?.success) {
           setIsLogin(true);
@@ -109,11 +111,12 @@ function App() {
             <Route path={"/signup"} exact={true} element={<Register />} />
             <Route path={"/cart"} exact={true} element={<CartPage />} />
             <Route path={"/verify"} exact={true} element={<Verify />} />
-            <Route path={"/forgot-password"} exact={true} element={<ForgotPassword />} />
+            <Route path={"/change-password"} exact={true} element={<ChangePassword />} />
             <Route path={"/checkout"} exact={true} element={<Checkout />} />
             <Route path={"/my-account"} exact={true} element={<MyAccount />} />
             <Route path={"/my-list"} exact={true} element={<MyList />} />
             <Route path={"/my-orders"} exact={true} element={<Orders />} />
+            <Route path={"/forgot-password-email"} element={<ResetPasswordEmail />} />
           </Routes>
           <Footer />
         </MyContext.Provider>

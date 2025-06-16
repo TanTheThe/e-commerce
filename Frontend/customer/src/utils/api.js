@@ -2,17 +2,17 @@ import axios from 'axios';
 
 const apiUrl = import.meta.env.VITE_API_URL
 
-export const postData = async (url, formData) => {
+export const postDataApi = async (url, data) => {
     try {
-        const respone = await axios({
-            method: 'POST',
-            url: apiUrl + url,
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
-                "Content-Type": 'application/json'
-            },
-            data: JSON.stringify(formData)
-        })
+        const respone = await axios.post(
+            apiUrl + url,
+            data,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+                    "Content-Type": 'application/json'
+                },
+            })
 
         return {
             success: true,
@@ -29,14 +29,16 @@ export const postData = async (url, formData) => {
     }
 }
 
-export const fetchDataFromApi = async (url) => {
+export const getDataApi = async (url) => {
     try {
-        const respone = await axios.get(apiUrl + url, {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
-                "Content-Type": 'application/json'
-            }
-        })
+        const respone = await axios.get(
+            apiUrl + url,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+                    "Content-Type": 'application/json'
+                }
+            })
 
         return {
             success: true,
@@ -51,6 +53,60 @@ export const fetchDataFromApi = async (url) => {
         }
     }
 }
+
+export const putDataApi = async (url, data) => {
+    try {
+        const respone = await axios.put(
+            apiUrl + url,
+            data,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+                    "Content-Type": 'application/json'
+                },
+            })
+
+        return {
+            success: true,
+            statusCode: 200,
+            data: respone.data
+        }
+
+    } catch (error) {
+        return {
+            success: false,
+            statusCode: 400,
+            data: error?.response?.data
+        }
+    }
+}
+
+export const deleteDataApi = async (url, data) => {
+    try {
+        const respone = await axios.delete(
+            apiUrl + url,
+            {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("accesstoken")}`,
+                    "Content-Type": 'application/json'
+                },
+            })
+
+        return {
+            success: true,
+            statusCode: 200,
+            data: respone.data
+        }
+
+    } catch (error) {
+        return {
+            success: false,
+            statusCode: 400,
+            data: error?.response?.data
+        }
+    }
+}
+
 
 export const fetchWithAutoRefresh = async (url, method = 'GET', body = null) => {
     const accessToken = localStorage.getItem("accesstoken");

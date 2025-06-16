@@ -4,6 +4,7 @@ import Button from "@mui/material/Button";
 import { MdEmail } from "react-icons/md";
 import { BiSolidLockAlt } from "react-icons/bi";
 import { CardContent, Card } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 const Verify = () => {
     const [otp, setOtp] = useState("")
@@ -15,6 +16,8 @@ const Verify = () => {
         e.preventDefault()
         alert(otp)
     }
+
+    const navigate = useNavigate();
 
     return (
         // <section className="section py-10">
@@ -40,6 +43,7 @@ const Verify = () => {
         //         </div>
         //     </div>
         // </section>
+        
 
         <div className="min-h-120 bg-gray-100 flex flex-col items-center justify-center p-4">
             <h1 className="text-4xl font-bold mb-4 text-gray-800">QUÊN MẬT KHẨU?</h1>
@@ -48,7 +52,7 @@ const Verify = () => {
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl w-full mt-5">
-                <Card className="rounded-2xl shadow-md transform transition-all duration-500 ease-in-out hover:-translate-y-3 hover:shadow-xl cursor-pointer">
+                <Card onClick={() => navigate("/forgot-password-email")} className="rounded-2xl shadow-md transform transition-all duration-500 ease-in-out hover:-translate-y-3 hover:shadow-xl cursor-pointer">
                     <CardContent className="flex flex-col items-center text-center p-6">
                         <div className="text-5xl text-indigo-600 mb-4">
                             <MdEmail />

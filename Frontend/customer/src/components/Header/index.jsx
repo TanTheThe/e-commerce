@@ -16,7 +16,7 @@ import { MyContext } from "../../App";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { IoBagCheckOutline } from "react-icons/io5";
-import { fetchDataFromApi, fetchWithAutoRefresh, postData } from "../../utils/api";
+import { getDataApi, fetchWithAutoRefresh, postDataApi } from "../../utils/api";
 
 
 const Header = () => {
@@ -43,8 +43,6 @@ const Header = () => {
             localStorage.removeItem("refreshtoken")
         }
     }
-
-    console.log(context?.userData)
 
     return (
         <header className="bg-white">
