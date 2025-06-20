@@ -26,7 +26,7 @@ async def create_evaluate(evaluate_data: EvaluateInputModel,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Đánh giá mới vừa được thêm vào",
+            "message": "Đánh giá mới vừa được thêm vào",
             "content": new_evaluate_dict
         }
     )
@@ -41,7 +41,7 @@ async def get_detail_evaluate_admin(evaluate_id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Chi tiết của đánh giá",
+            "message": "Chi tiết của đánh giá",
             "content": order_dict
         }
     )
@@ -55,7 +55,7 @@ async def get_detail_evaluate_customer(evaluate_id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Chi tiết của đánh giá",
+            "message": "Chi tiết của đánh giá",
             "content": order_dict
         }
     )
@@ -69,7 +69,7 @@ async def get_all_evaluate_admin(token_details: dict = Depends(access_token_bear
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin các đánh giá",
+            "message": "Thông tin các đánh giá",
             "content": evaluate_dict
         }
     )
@@ -82,7 +82,7 @@ async def get_all_evaluate_customer(session: AsyncSession = Depends(get_session)
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin các đánh giá",
+            "message": "Thông tin các đánh giá",
             "content": evaluate_dict
         }
     )
@@ -96,7 +96,7 @@ async def delete_product(id: str, token_details: dict = Depends(access_token_bea
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Xóa đánh giá thành công",
+            "message": "Xóa đánh giá thành công",
             "content": product
         }
     )

@@ -25,7 +25,7 @@ async def create_order(order_data: OrderCreateModel,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Sản phẩm mới vừa được thêm vào",
+            "message": "Sản phẩm mới vừa được thêm vào",
             "content": order_dict,
         }
     )
@@ -41,7 +41,7 @@ async def get_detail_order_customer(order_id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Chi tiết của đơn hàng",
+            "message": "Chi tiết của đơn hàng",
             "content": order_dict
         }
     )
@@ -56,7 +56,7 @@ async def get_detail_order_admin(order_id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Chi tiết của đơn hàng",
+            "message": "Chi tiết của đơn hàng",
             "content": order_dict
         }
     )
@@ -72,7 +72,7 @@ async def get_all_order_customer(skip: int = 0, limit: int = 10,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin các đơn hàng",
+            "message": "Thông tin các đơn hàng",
             "content": order_dict
         }
     )
@@ -87,7 +87,7 @@ async def get_all_order_admin(skip: int = 0, limit: int = 10,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin các đơn hàng",
+            "message": "Thông tin các đơn hàng",
             "content": order_dict
         }
     )
@@ -103,7 +103,7 @@ async def update_status(order_id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Trạng thái sau khi cập nhật",
+            "message": "Trạng thái sau khi cập nhật",
             "content": order_after_update.status
         }
     )

@@ -29,6 +29,9 @@ import SubCateList from './Pages/Category/SubCateList'
 import AddSubCategory from './Pages/Category/addSubCategory'
 import Users from './Pages/Users'
 import Orders from './Pages/Orders'
+import Verify from './Pages/Verify'
+import toast, {Toaster} from 'react-hot-toast'
+import ForgotPassword from './Pages/ForgotPassword'
 
 const Transition = React.forwardRef(function Transition(
   props, ref) {
@@ -81,6 +84,24 @@ function App() {
       element: (
         <>
           <SignUp />
+        </>
+      )
+    },
+    {
+      path: "/verify",
+      exact: true,
+      element: (
+        <>
+          <Verify />
+        </>
+      )
+    },
+    {
+      path: "/forgot-password",
+      exact: true,
+      element: (
+        <>
+          <ForgotPassword />
         </>
       )
     },
@@ -200,20 +221,30 @@ function App() {
     },
   ])
 
+  const openAlertBox = (status, msg) => {
+    if (status === "success") {
+      toast.success(msg)
+    }
+    if (status === "error") {
+      toast.error(msg)
+    }
+  }
+
   const values = {
     isSidebarOpen,
     setIsSidebarOpen,
     isLogin,
     setIsLogin,
     isOpenFullScreenPanel,
-    setIsOpenFullScreenPanel
+    setIsOpenFullScreenPanel,
+    openAlertBox
   }
 
   return (
     <>
       <MyContext.Provider value={values}>
         <RouterProvider router={router} />
-
+        <Toaster position="top-center" reverseOrder={false} />
         <Dialog
           fullScreen
           open={isOpenFullScreenPanel.open}

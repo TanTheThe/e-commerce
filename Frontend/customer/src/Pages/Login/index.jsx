@@ -62,20 +62,22 @@ const Login = () => {
 
         if (response?.success === true) {
             console.log(response);
+
+            localStorage.setItem("userEmail", formFields.email)
+            localStorage.setItem("accesstoken", response?.data?.access_token)
+            localStorage.setItem("refreshtoken", response?.data?.refresh_token)
+
+            await context.checkLogin();
+
             setIsLoading(false)
             context.openAlertBox(
-                "success", response?.data?.messages
+                "success", response?.message
             )
-            localStorage.setItem("userEmail", formFields.email)
+
             setFormFields({
                 email: "",
                 password: ""
             })
-
-            localStorage.setItem("accesstoken", response?.data?.access_token)
-            localStorage.setItem("refreshtoken", response?.data?.refresh_token)
-
-            context.setIsLogin(true)
 
             history("/")
         } else {
@@ -96,7 +98,6 @@ const Login = () => {
             context.openAlertBox("error", "Có lỗi xảy ra trong quá trình xác thực!")
         }
     }, [verified]);
-
 
 
     return (
@@ -126,13 +127,13 @@ const Login = () => {
                         <a className="link cursor-pointer text-[14px] font-[600]" onClick={forgotPassword}>Forgot Password?</a>
 
                         <div className="flex items-center w-full mt-3 mb-3">
-                            <Button type="submit" disabled={!validateValue} className="btn-org btn-lg w-full">
+                            <button type="submit" disabled={!validateValue || isLoading} className={`btn-org btn-lg w-full ${(!validateValue || isLoading) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}>
                                 {
                                     isLoading === true ? <CircularProgress color="inherit" />
                                         :
                                         'Login'
                                 }
-                            </Button>
+                            </button>
                         </div>
 
                         <p className="text-center">Not Registered? <Link className="link text-[14px] font-[600] text-[#ff5252]"

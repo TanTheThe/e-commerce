@@ -3,7 +3,8 @@ from src.database.models import User
 from src.errors.authentication import AuthException
 from src.errors.user import UserException
 from src.schemas.user import UserCreateModel, UserReadModel
-from src.crud.authentication.utils import generate_password_hash, create_url_safe_token, decode_url_safe_token
+from src.crud.authentication.utils import generate_password_hash, create_url_safe_token, decode_url_safe_token, \
+    verify_password
 from sqlmodel import and_
 from src.mail import create_message, mail
 from fastapi import HTTPException, BackgroundTasks
@@ -95,7 +96,7 @@ class UserService:
 
         new_user = await user_repository.create_user(user_data, session)
 
-        token = create_url_safe_token({"email": email}, role="customer")
+        token = create_url_safe_token({"email": email}, role="customer", purpose="create_account")
         link = f"http://{Config.DOMAIN}/api/v1/customer/user/verify/{token}"
         html = f"""
                <h1>Xác thực email</h1>
@@ -114,7 +115,7 @@ class UserService:
 
 
     async def verify_user_account_service(self, token: str, session: AsyncSession):
-        token_data = decode_url_safe_token(token, role="customer")
+        token_data = decode_url_safe_token(token, role="customer", purpose="create_account")
         if token_data is None:
             AuthException.authentication_error()
 
@@ -135,6 +136,13 @@ class UserService:
 
 
     async def change_password_service(self, id: str, password_data, session: AsyncSession):
+        condition = and_(User.id == id)
+        user = await user_repository.get_user(condition, session)
+        password_valid = verify_password(password_data.old_password, user.password)
+
+        if not password_valid:
+            AuthException.invalid_password()
+
         new_password = password_data.new_password
         confirm_password = password_data.confirm_new_password
 

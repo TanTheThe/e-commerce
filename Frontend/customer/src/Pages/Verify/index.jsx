@@ -41,7 +41,7 @@ const Verify = () => {
                     </CardContent>
                 </Card>
 
-                <Card className="rounded-2xl shadow-md transform transition-all duration-500 ease-in-out hover:-translate-y-3 hover:shadow-xl cursor-pointer">
+                <Card onClick={() => navigate("/send-mail")} className="rounded-2xl shadow-md transform transition-all duration-500 ease-in-out hover:-translate-y-3 hover:shadow-xl cursor-pointer">
                     <CardContent className="flex flex-col items-center text-center p-6">
                         <div className="text-5xl text-red-500 mb-4">
                             <BiSolidLockAlt />

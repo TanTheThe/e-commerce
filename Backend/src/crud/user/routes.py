@@ -8,13 +8,13 @@ from fastapi.responses import JSONResponse
 from src.dependencies import admin_role_middleware, customer_role_middleware
 from fastapi.responses import RedirectResponse
 
-
 user_service = UserService()
 access_token_bearer = AccessTokenBearer()
 
 user_admin_router = APIRouter(prefix="/user")
 user_customer_router = APIRouter(prefix="/user")
 user_common_router = APIRouter(prefix="/user")
+
 
 @user_customer_router.post("/signup", status_code=status.HTTP_201_CREATED)
 async def create_user_account(user_data: UserCreateModel, bg_tasks: BackgroundTasks,
@@ -24,14 +24,14 @@ async def create_user_account(user_data: UserCreateModel, bg_tasks: BackgroundTa
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Tạo tài khoản thành công! Vui lòng kiểm tra email để tiến hành xác thực",
+            "message": "Tạo tài khoản thành công! Vui lòng kiểm tra email để tiến hành xác thực",
             "content": new_user.model_dump()
         }
     )
 
 
 @user_customer_router.get('/verify/{token}')
-async def verify_user_account(token: str, session:AsyncSession = Depends(get_session)):
+async def verify_user_account(token: str, session: AsyncSession = Depends(get_session)):
     try:
         await user_service.verify_user_account_service(token, session)
         return RedirectResponse(url="http://localhost:5173/login?verified=true", status_code=302)
@@ -41,22 +41,22 @@ async def verify_user_account(token: str, session:AsyncSession = Depends(get_ses
 
 @user_customer_router.put('/', dependencies=[Depends(customer_role_middleware)])
 async def update_profile_customer(user_update_data: CustomerUpdateModel,
-                                  session:AsyncSession = Depends(get_session),
+                                  session: AsyncSession = Depends(get_session),
                                   token_details: dict = Depends(access_token_bearer)):
     id = token_details['user']['id']
     updated_user = await user_service.update_profile_service(id, user_update_data, session)
 
     return JSONResponse(
-                status_code=status.HTTP_200_OK,
-                content={
-                    "messages": "Cập nhật thông tin người dùng thành công",
-                    "content": {
-                        "first_name": updated_user.first_name,
-                        "last_name": updated_user.last_name,
-                        "phone": updated_user.phone
-                    }
-                }
-            )
+        status_code=status.HTTP_200_OK,
+        content={
+            "message": "Cập nhật thông tin người dùng thành công",
+            "content": {
+                "first_name": updated_user.first_name,
+                "last_name": updated_user.last_name,
+                "phone": updated_user.phone
+            }
+        }
+    )
 
 
 @user_customer_router.get('/', dependencies=[Depends(customer_role_middleware)])
@@ -68,7 +68,7 @@ async def get_profile_customer(token_details: dict = Depends(access_token_bearer
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin người dùng",
+            "message": "Thông tin người dùng",
             "content": filtered_user
         }
     )
@@ -76,20 +76,19 @@ async def get_profile_customer(token_details: dict = Depends(access_token_bearer
 
 @user_admin_router.put('/{id}', dependencies=[Depends(admin_role_middleware)])
 async def update_status_by_admin(id: str, user_update_data: AdminUpdateModel,
-                               token_details: dict = Depends(access_token_bearer),
-                               session:AsyncSession = Depends(get_session)):
+                                 token_details: dict = Depends(access_token_bearer),
+                                 session: AsyncSession = Depends(get_session)):
     updated_user = await user_service.update_profile_service(id, user_update_data, session)
 
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Cập nhật trạng thái khách hạng thành công",
+            "message": "Cập nhật trạng thái khách hạng thành công",
             "content": {
                 "customer_status": updated_user.customer_status
             }
         }
     )
-
 
 
 @user_admin_router.get('/{id}', dependencies=[Depends(admin_role_middleware)])
@@ -100,7 +99,7 @@ async def get_detail_by_admin(id: str, token_details: dict = Depends(access_toke
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin người dùng",
+            "message": "Thông tin người dùng",
             "content": filtered_user
         }
     )
@@ -114,7 +113,7 @@ async def get_all_customer(token_details: dict = Depends(access_token_bearer),
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin người dùng",
+            "message": "Thông tin người dùng",
             "content": filtered_users
         }
     )
@@ -132,7 +131,3 @@ async def change_password_admin(passwords: ChangePasswordModel, session: AsyncSe
                                 token_details: dict = Depends(access_token_bearer)):
     user_id = token_details['user']['id']
     return await user_service.change_password_service(user_id, passwords, session)
-
-
-
-

@@ -25,7 +25,7 @@ async def create_categories(categories_data: CategoriesCreateModel,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Danh mục mới vừa được thêm vào",
+            "message": "Danh mục mới vừa được thêm vào",
             "content": new_categories_dict
         }
     )
@@ -47,7 +47,7 @@ async def get_all_categories_admin(session:AsyncSession = Depends(get_session),
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin các danh mục",
+            "message": "Thông tin các danh mục",
             "content": filtered_categories
         }
     )
@@ -68,7 +68,7 @@ async def get_all_categories_customer(session:AsyncSession = Depends(get_session
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin các danh mục",
+            "message": "Thông tin các danh mục",
             "content": filtered_categories
         }
     )
@@ -84,7 +84,7 @@ async def update_categories(id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Cập nhật danh mục thành công",
+            "message": "Cập nhật danh mục thành công",
             "content": categories_update_dict
         }
     )
@@ -98,7 +98,7 @@ async def delete_categories(id: str, token_details: dict = Depends(access_token_
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Xóa danh mục thành công",
+            "message": "Xóa danh mục thành công",
             "content": categories_delete
         }
     )

@@ -25,7 +25,7 @@ async def create_special_offer(special_offer_data: SpecialOfferCreateModel,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Voucher mới vừa được thêm vào",
+            "message": "Voucher mới vừa được thêm vào",
             "content": new_special_offer_dict
         }
     )
@@ -48,7 +48,7 @@ async def get_all_special_offer_admin(session:AsyncSession = Depends(get_session
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin các voucher",
+            "message": "Thông tin các voucher",
             "content": special_offer_dict
         }
     )
@@ -75,7 +75,7 @@ async def get_all_special_offer_customer(session:AsyncSession = Depends(get_sess
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin các voucher",
+            "message": "Thông tin các voucher",
             "content": filtered_special_offers
         }
     )
@@ -91,7 +91,7 @@ async def update_special_offer(id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Cập nhật voucher thành công",
+            "message": "Cập nhật voucher thành công",
             "content": special_offer_update_dict
         }
     )
@@ -105,7 +105,7 @@ async def delete_categories(id: str, token_details: dict = Depends(access_token_
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Xóa voucher thành công",
+            "message": "Xóa voucher thành công",
             "content": special_offer_delete
         }
     )

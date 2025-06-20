@@ -7,7 +7,6 @@ import logging
 from itsdangerous import URLSafeTimedSerializer
 from jwt import ExpiredSignatureError, InvalidTokenError
 
-
 passwd_context = CryptContext(
     schemes=['bcrypt']
 )
@@ -17,18 +16,45 @@ ROLE_SECRET_MAP = {
     "customer": Config.JWT_SECRET_CUSTOMER,
 }
 
-ACCESS_TOKEN_EXPIRY = 3000
+TOKEN_CONFIG = {
+    ("customer", "reset_password"): {
+        "secret": "JWT_RESET_PASSWORD_SECRET_CUSTOMER",
+        "salt": "customer-reset-password",
+    },
+    ("admin", "reset_password"): {
+        "secret": "JWT_RESET_PASSWORD_SECRET_ADMIN",
+        "salt": "admin-reset-password",
+    },
+    ("admin", "first_class_login"): {
+        "secret": "JWT_FIRST_CLASS_LOGIN_SECRET_ADMIN",
+        "salt": "admin-first-class-login",
+    },
+    ("admin", "verify_otp"): {
+        "secret": "JWT_VERIFY_OTP_LOGIN_SECRET_ADMINN",
+        "salt": "admin-verify-otp",
+    },
+    ("customer", "create_account"): {
+        "secret": "JWT_CREATE_ACCOUNT_SECRET_CUSTOMER",
+        "salt": "customer-create-account",
+    }
+}
+
+ACCESS_TOKEN_EXPIRY = 60
+
 
 # Hàm băm mật khẩu
 def generate_password_hash(password: str) -> str:
     hash = passwd_context.hash(password)
     return hash
 
+
 # Hàm kiểm tra xem mật khẩu nhập vào có khớp với mã băm hay không.
 def verify_password(password: str, hash: str) -> bool:
     return passwd_context.verify(password, hash)
 
-def create_access_token(user_data: dict, role:str, expiry: timedelta = None, refresh: bool = False):
+
+# Token chính cho đăng nhập
+def create_access_token(user_data: dict, role: str, expiry: timedelta = None, refresh: bool = False):
     if role not in ROLE_SECRET_MAP:
         raise ValueError("Không tồn tại role trên")
 
@@ -50,6 +76,7 @@ def create_access_token(user_data: dict, role:str, expiry: timedelta = None, ref
 
     return token
 
+
 def decode_token(token: str):
     for role, secret_key in ROLE_SECRET_MAP.items():
         try:
@@ -68,26 +95,28 @@ def decode_token(token: str):
     return None
 
 
-def get_serializer_for_role(role: str) -> URLSafeTimedSerializer:
-    if role == "admin":
-        salt = "admin-email-configuration"
-        return URLSafeTimedSerializer(secret_key=Config.JWT_SECRET_ADMIN, salt=salt)
-    elif role == "customer":
-        salt = "customer-email-configuration"
-        return URLSafeTimedSerializer(secret_key=Config.JWT_SECRET_CUSTOMER, salt=salt)
-    else:
-        raise ValueError("Invalid role")
+# Token phụ cho các trường hợp đặc biệt
+def get_serializer(role: str, purpose: str) -> URLSafeTimedSerializer:
+    config = TOKEN_CONFIG.get((role, purpose))
+    if not config:
+        raise ValueError(f"Invalid combination: role={role}, purpose={purpose}")
+
+    secret = getattr(Config, config["secret"], None)
+    if not secret:
+        raise ValueError(f"Secret key not found: {config['secret']}")
+
+    return URLSafeTimedSerializer(secret_key=secret, salt=config["salt"])
 
 
-def create_url_safe_token(data: dict, role: str) -> str:
-    serializer = get_serializer_for_role(role)
+def create_url_safe_token(data: dict, role: str, purpose: str) -> str:
+    serializer = get_serializer(role, purpose)
     return serializer.dumps(data)
 
-def decode_url_safe_token(token: str, role: str) -> dict:
+
+def decode_url_safe_token(token: str, role: str, purpose: str) -> dict | None:
     try:
-        serializer = get_serializer_for_role(role)
+        serializer = get_serializer(role, purpose)
         return serializer.loads(token)
     except Exception as e:
-        logging.error(f"Token decode error for role={role}: {str(e)}")
+        logging.error(f"Token decode error for role={role}, purpose={purpose}: {str(e)}")
         return None
-

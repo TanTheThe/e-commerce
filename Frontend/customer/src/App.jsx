@@ -22,7 +22,7 @@ import Register from './Pages/Register'
 import CartPage from './Pages/Cart'
 import Verify from './Pages/Verify'
 import toast, { Toaster } from 'react-hot-toast';
-import ChangePassword from './Pages/ChangePassword'
+import ChangePassword from './Pages/ResetPassword'
 import Checkout from './Pages/Checkout'
 import MyAccount from './Pages/MyAccount'
 import MyList from './Pages/MyList'
@@ -31,6 +31,7 @@ import { getDataApi, fetchWithAutoRefresh } from './utils/api'
 import ResetPasswordEmail from './Pages/ResetPasswordEmail'
 import ResetPasswordOtp from './Pages/ResetPasswordOtp'
 import EmailToChangePass from './Pages/EmailToChangePass'
+import useAuth from './Pages/Login/auth'
 
 
 const MyContext = createContext()
@@ -39,10 +40,9 @@ function App() {
   const [openProductDetailsModal, setOpenProductDetailsModal] = useState(false);
   const [maxWidth, setMaxWidth] = useState('lg');
   const [fullWidth, setFullWidth] = useState(true);
-  const [isLogin, setIsLogin] = useState(false)
-  const [userData, setUserData] = useState(null)
-
   const [openCartPanel, setOpenCartPanel] = useState(false);
+
+  const { isLogin, setIsLogin, userData, setUserData, isLoading, checkLogin } = useAuth();
 
   const handleCloseProductDetailsModal = () => {
     setOpenProductDetailsModal(false);
@@ -61,33 +61,6 @@ function App() {
     }
   }
 
-  useEffect(() => {
-    const checkLogin = async () => {
-      const token = localStorage.getItem("accesstoken");
-
-      if (token) {
-        const response = await fetchWithAutoRefresh("/customer/user", "GET");
-        console.log(response);
-
-        if (response?.success) {
-          setIsLogin(true);
-          setUserData(response.data);
-        } else {
-          setIsLogin(false);
-          setUserData(null);
-          localStorage.removeItem("accesstoken");
-          localStorage.removeItem("refreshtoken");
-        }
-      } else {
-        setIsLogin(false);
-        setUserData(null);
-      }
-    };
-
-    checkLogin();
-  }, [])
-
-
   const values = {
     setOpenProductDetailsModal,
     setOpenCartPanel,
@@ -97,7 +70,9 @@ function App() {
     isLogin,
     setIsLogin,
     setUserData,
-    userData
+    userData,
+    checkLogin, 
+    isLoading
   }
 
   return (
@@ -113,7 +88,7 @@ function App() {
             <Route path={"/signup"} exact={true} element={<Register />} />
             <Route path={"/cart"} exact={true} element={<CartPage />} />
             <Route path={"/verify"} exact={true} element={<Verify />} />
-            <Route path={"/change-password"} exact={true} element={<ChangePassword />} />
+            <Route path={"/reset-password/:token"} exact={true} element={<ChangePassword />} />
             <Route path={"/checkout"} exact={true} element={<Checkout />} />
             <Route path={"/my-account"} exact={true} element={<MyAccount />} />
             <Route path={"/my-list"} exact={true} element={<MyList />} />

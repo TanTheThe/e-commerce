@@ -45,33 +45,28 @@ class UserLoginModel(BaseModel):
     email: str
     password: str
 
-class UserLoginAdminModel(UserLoginModel):
+class LoginAdminModel(BaseModel):
     email: str
     password: str
-    otp: Optional[str]
+
+class Setup2FA(BaseModel):
+    token: str
+
+class VerifyLoginAdminModel(BaseModel):
+    token: str
+    otp: str
 
 class PasswordResetEmailModel(BaseModel):
     email: str
     check: str
 
 class PasswordResetConfirmModel(BaseModel):
+    token: str
     new_password: str
     confirm_new_password: str
-    email: Optional[str] = None
-    otp: Optional[str] = None
-    check: str
-
-    @model_validator(mode='after')
-    def validate_fields_based_on_check(self):
-        if self.check.lower() == 'otp':
-            if not self.email:
-                raise ValueError("Trường 'email' là bắt buộc khi sử dụng OTP")
-            if not self.otp:
-                raise ValueError("Trường 'otp' là bắt buộc khi sử dụng OTP")
-
-        return self
 
 class ChangePasswordModel(BaseModel):
+    old_password: str
     new_password: str
     confirm_new_password: str
 

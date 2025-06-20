@@ -1,26 +1,44 @@
 import Button from "@mui/material/Button";
-import React from "react";
+import React, { useContext, useState } from "react";
 import { FaCloudUploadAlt, FaRegUser } from "react-icons/fa";
 import { IoIosLogOut, IoMdHeartEmpty } from "react-icons/io";
 import { IoBagCheckOutline } from "react-icons/io5";
 import { NavLink } from "react-router";
+import { MyContext } from "../../App";
 
 const AccountSideBar = () => {
+    const context = useContext(MyContext)
+    if (context?.isLoading || !context?.userData) {
+        return (
+            <div className="card bg-white shadow-md rounded-md sticky top-[10px]">
+                <div className="w-full p-5 flex items-center justify-center flex-col">
+                    <div className="w-[110px] h-[110px] rounded-full overflow-hidden relative group bg-gray-200 animate-pulse">
+                        {/* Skeleton loader */}
+                    </div>
+                    <div className="h-6 bg-gray-200 rounded w-32 mt-3 animate-pulse"></div>
+                    <div className="h-4 bg-gray-200 rounded w-24 mt-2 animate-pulse"></div>
+                </div>
+                <ul className="list-none pb-5 bg-[#faf9f9] myAccountTabs">
+                    {/* Skeleton for menu items */}
+                    {[1, 2, 3, 4].map(item => (
+                        <li key={item} className="w-full">
+                            <div className="w-full h-12 bg-gray-200 animate-pulse mx-5 my-2 rounded"></div>
+                        </li>
+                    ))}
+                </ul>
+            </div>
+        )
+    }
+
     return (
         <div className="card bg-white shadow-md rounded-md sticky top-[10px]">
             <div className="w-full p-5 flex items-center justify-center flex-col">
-                <div className="w-[110px] h-[110px] rounded-full overflow-hidden mb-4 relative group">
-                    <img className="w-full h-full object-cover" src='https://thethaovanhoa.mediacdn.vn/372676912336973824/2022/12/16/avatar3-1671164179193908857633.jpg' />
-
-                    <div className="overlay w-[100%] h-[100%] absolute top-0 left-0 z-50 bg-[rgba(0,0,0,0.7)] flex items-center justify-center cursor-pointer opacity-0 transition-all
-                                group-hover:opacity-100">
-                        <FaCloudUploadAlt className="text-[#fff] text-[25px]" />
-                        <input type="file" className="absolute top-0 left-0 w-full h-full opacity-0" />
-                    </div>
+                <div className="w-[110px] h-[110px] rounded-full overflow-hidden relative group">
+                    <img className="w-full h-full object-cover" src='avatar.png' />
                 </div>
 
-                <h3>Rajesh Sharma</h3>
-                <h6 className="text-[13px] font-[500]">the63574@gmail.com</h6>
+                <h3>{context?.userData?.first_name} {context?.userData?.last_name}</h3>
+                <h6 className="text-[13px] font-[500]">{context?.userData?.email}</h6>
             </div>
 
             <ul className="list-none pb-5 bg-[#faf9f9] myAccountTabs">
@@ -53,7 +71,6 @@ const AccountSideBar = () => {
                         <IoIosLogOut className="text-[17px]" /> Logout
                     </Button>
                 </li>
-
             </ul>
         </div>
     )

@@ -1,16 +1,16 @@
 import Button from "@mui/material/Button";
 import React, { useContext, useState } from "react";
 import OtpBox from "../../components/OtpBox";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { MyContext } from "../../App";
 import { postDataApi } from "../../utils/api";
 
 const ResetPasswordOtp = () => {
     const [otp, setOtp] = useState("")
-    const [token, setToken] = useState(null)
     const [isLoading, setIsLoading] = useState(false)
     const location = useLocation()
     const email = location.state?.email
+    const navigate = useNavigate()
 
     const context = useContext(MyContext)
 
@@ -34,11 +34,11 @@ const ResetPasswordOtp = () => {
         });
 
         if (response?.success === true) {
-            setToken(response?.data?.token);
-
             context.openAlertBox(
                 "success", "Xác thực OTP thành công"
             )
+
+            navigate(`/reset-password/${response?.data?.token}`)
         } else {
             setIsLoading(false)
             context.openAlertBox("error", response?.data?.detail?.message)
@@ -68,12 +68,6 @@ const ResetPasswordOtp = () => {
                             </Button>
                         </div>
                     </form>
-
-                    {token && (
-                        <div className="mt-4 text-sm text-green-600 text-center break-all">
-                            Token: {token}
-                        </div>
-                    )}
                 </div>
             </div>
         </section>

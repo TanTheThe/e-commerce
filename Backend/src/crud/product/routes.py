@@ -24,7 +24,7 @@ async def create_product(product_data: ProductCreateModel,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Sản phẩm mới vừa được thêm vào",
+            "message": "Sản phẩm mới vừa được thêm vào",
             "content": product_dict
         }
     )
@@ -37,7 +37,7 @@ async def get_detail_product_customer(id: str, session:AsyncSession = Depends(ge
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin chi tiết của sản phẩm",
+            "message": "Thông tin chi tiết của sản phẩm",
             "content": product_dict
         }
     )
@@ -52,7 +52,7 @@ async def get_detail_product_admin(id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin chi tiết của sản phẩm",
+            "message": "Thông tin chi tiết của sản phẩm",
             "content": product_dict
         }
     )
@@ -66,7 +66,7 @@ async def get_all_product_customer(skip: int = 0, limit: int = 10,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin của các sản phẩm",
+            "message": "Thông tin của các sản phẩm",
             "content": product_list_dict
         }
     )
@@ -81,7 +81,7 @@ async def get_all_product_admin(token_details: dict = Depends(access_token_beare
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin của các sản phẩm",
+            "message": "Thông tin của các sản phẩm",
             "content": product_list_dict
         }
     )
@@ -96,7 +96,7 @@ async def update_product(id: str, product_data: ProductUpdateModel,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin của các sản phẩm sau khi cập nhật",
+            "message": "Thông tin của các sản phẩm sau khi cập nhật",
             "content": product
         }
     )
@@ -110,7 +110,7 @@ async def delete_product(id: str, token_details: dict = Depends(access_token_bea
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Xóa sản phẩm thành công",
+            "message": "Xóa sản phẩm thành công",
             "content": product
         }
     )

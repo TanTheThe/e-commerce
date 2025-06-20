@@ -25,7 +25,7 @@ async def create_new_address(address_data: AddressCreateModel,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Địa chỉ mới vừa được thêm vào",
+            "message": "Địa chỉ mới vừa được thêm vào",
             "content": new_address_dict
         }
     )
@@ -40,7 +40,7 @@ async def get_all_address(token_details: dict = Depends(access_token_bearer),
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Thông tin địa chỉ",
+            "message": "Thông tin địa chỉ",
             "content": filtered_address
         }
     )
@@ -56,7 +56,7 @@ async def update_address(id: str, address_update: AddressUpdateModel,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Cập nhật địa chỉ thành công",
+            "message": "Cập nhật địa chỉ thành công",
             "content": address_update_dict
         }
     )
@@ -71,7 +71,7 @@ async def delete_address(id: str,
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={
-            "messages": "Xóa địa chỉ thành công",
+            "message": "Xóa địa chỉ thành công",
             "content": address_delete
         }
     )

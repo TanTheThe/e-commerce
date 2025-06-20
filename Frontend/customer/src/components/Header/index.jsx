@@ -34,9 +34,6 @@ const Header = () => {
         setAnchorEl(null)
         const response = await fetchWithAutoRefresh("/customer/auth/logout", "GET")
 
-        console.log(response)
-
-
         if (response?.success === true) {
             context.setIsLogin(false)
             localStorage.removeItem("accesstoken")

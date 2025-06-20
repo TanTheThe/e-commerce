@@ -16,6 +16,7 @@ import { BsCheckLg } from "react-icons/bs";
 
 const Register = () => {
     const [isShowPassword, setIsShowPassword] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
     const [formFields, setFormFields] = useState({
         first_name: "",
         last_name: "",
@@ -26,53 +27,31 @@ const Register = () => {
     const context = useContext(MyContext)
 
     const onChangeInput = (e) => {
-        const { name, value } = e.target
-        setFormFields(() => {
-            return {
-                ...formFields,
-                [name]: value
-            }
-        })
-    }
+        const { name, value } = e.target;
+        setFormFields((prev) => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
-    const validateValue = Object.values(formFields).every(el => el)
+    const isValidEmail = (email) =>
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+    const allFieldsFilled = Object.values(formFields).every((el) => el.trim() !== "");
+    const isFormValid = allFieldsFilled && isValidEmail(formFields.email);
 
     const handleSubmit = async (e) => {
         e.preventDefault()
 
-        if (formFields.first_name === "") {
-            context.openAlertBox(
-                "error", "Please enter first name"
-            )
-            return false
-        }
-
-        if (formFields.last_name === "") {
-            context.openAlertBox(
-                "error", "Please enter last name"
-            )
-            return false
-        }
-
-        if (formFields.email === "") {
-            context.openAlertBox(
-                "error", "Please enter email"
-            )
-            return false
-        }
-
-        if (formFields.password === "") {
-            context.openAlertBox(
-                "error", "Please enter password"
-            )
-            return false
-        }
+        setIsLoading(true);
 
         const response = await postDataApi("/customer/user/signup", formFields);
+        console.log(response);
 
         if (response?.success === true) {
+            setIsLoading(false)
             context.openAlertBox(
-                "success", response?.data?.messages
+                "success", response?.message
             )
             setFormFields({
                 first_name: "",
@@ -81,6 +60,7 @@ const Register = () => {
                 password: ""
             })
         } else {
+            setIsLoading(false)
             context.openAlertBox("error", response?.data?.detail?.message)
         }
     }
@@ -94,18 +74,28 @@ const Register = () => {
                     <form className="w-full mt-5" onSubmit={handleSubmit}>
                         <div className="form-group w-full mb-5">
                             <TextField type="text" id="first_name" name="first_name" value={formFields.first_name} label="First name" variant="outlined" className="w-full"
+                                disabled={isLoading === true ? true : false}
                                 onChange={onChangeInput} />
                         </div>
                         <div className="form-group w-full mb-5">
                             <TextField type="text" id="last_name" name="last_name" value={formFields.last_name} label="Last name" variant="outlined" className="w-full"
+                                disabled={isLoading === true ? true : false}
                                 onChange={onChangeInput} />
                         </div>
                         <div className="form-group w-full mb-5">
                             <TextField type="email" id="email" name="email" value={formFields.email} label="Email *" variant="outlined" className="w-full"
-                                onChange={onChangeInput} />
+                                disabled={isLoading === true ? true : false}
+                                onChange={onChangeInput} error={formFields.email && !isValidEmail(formFields.email)}
+                                helperText={
+                                    formFields.email && !isValidEmail(formFields.email)
+                                        ? "Email không chính xác"
+                                        : ""
+                                } />
                         </div>
                         <div className="form-group w-full mb-5 relative">
-                            <TextField type={isShowPassword === false ? "password" : "text"} id="password" name="password" value={formFields.password} label="Password *" variant="outlined" className="w-full"
+                            <TextField type={isShowPassword === false ? "password" : "text"} id="password" name="password" value={formFields.password}
+                                disabled={isLoading === true ? true : false}
+                                label="Password *" variant="outlined" className="w-full"
                                 onChange={onChangeInput} />
                             <Button className="!absolute top-[10px] right-[10px] z-50 !w-[35px] !h-[35px] !min-w-[35px]
                             !rounded-full !text-black" onClick={() => setIsShowPassword(!isShowPassword)}>
@@ -118,9 +108,13 @@ const Register = () => {
                         </div>
 
                         <div className="flex items-center w-full mt-3 mb-3">
-                            <Button type="submit" className="btn-org btn-lg w-full flex gap-3">
-                                Register
-                            </Button>
+                            <button type="submit" disabled={!isFormValid || isLoading} className={`btn-org btn-lg w-full flex gap-3 items-center justify-center transition ${(!isFormValid || isLoading) ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}>
+                                {
+                                    isLoading === true ? <CircularProgress color="inherit" />
+                                        :
+                                        'Register'
+                                }
+                            </button>
                         </div>
 
                         <p className="text-center">Already have an account? <Link className="link text-[14px] font-[600] text-[#ff5252]"

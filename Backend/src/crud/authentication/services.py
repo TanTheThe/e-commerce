@@ -14,13 +14,13 @@ from io import BytesIO
 import base64
 from src.database.redis import add_jti_to_blocklist
 from src.mail import create_message, mail
-from src.schemas.user import UserLoginAdminModel, UserLoginModel
+from src.schemas.user import LoginAdminModel, UserLoginModel, Setup2FA, VerifyLoginAdminModel
 from src.errors.authentication import AuthException
 
 REFRESH_TOKEN_EXPIRY = 2
 
 class AuthenticationService:
-    async def login_admin_service(self, user_data: UserLoginAdminModel, session: AsyncSession):
+    async def login_admin_service(self, user_data: LoginAdminModel, session: AsyncSession):
         email = user_data.email
         password = user_data.password
 
@@ -31,83 +31,128 @@ class AuthenticationService:
 
         password_valid = verify_password(password, user.password)
 
-        if password_valid:
-            if user.is_verified:
-                if user.is_admin:
+        if not password_valid:
+            AuthException.invalid_account()
 
-                    # Nếu chưa bật 2FA
-                    if not user.two_fa_secret or not user.two_fa_enabled:
-                        # Tạo secret key
-                        secret = pyotp.random_base32()
-                        user.two_fa_secret = secret
-                        user.two_fa_enabled = True
-                        await session.commit()
-
-                        # Tạo QR Code
-                        issuer = "E-Commerce"
-                        otp_url = pyotp.totp.TOTP(secret).provisioning_uri(name=user.email, issuer_name=issuer)
-                        qr = qrcode.make(otp_url)
-
-                        # Chuyển QR Code thành Base64
-                        buffered = BytesIO()
-                        qr.save(buffered, format="PNG")
-                        qr.save("user_qr.png")
-                        qr_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
-
-                        return JSONResponse(
-                            content={
-                                "message": "Lần đăng nhập đầu tiên - vui lòng quét QR với Google Authenticator",
-                                "qr_code_base64": qr_base64,
-                            }
-                        )
-
-                    # Nếu đã bật 2FA, nhưng chưa nhập OTP mà login
-                    if not user_data.otp:
-                        AuthException.otp_required()
-
-                    # Kiểm tra otp
-                    totp = pyotp.TOTP(user.two_fa_secret)
-
-                    if not totp.verify(user_data.otp):
-                        AuthException.invalid_otp()
-
-                    access_token = create_access_token(
-                        user_data={
-                            "first_name": user.first_name,
-                            "last_name": user.last_name,
-                            "id": str(user.id)
-                        },
-                        role="admin"
-                    )
-
-                    refresh_token = create_access_token(
-                        user_data={
-                            "first_name": user.first_name,
-                            "last_name": user.last_name,
-                            "id": str(user.id)
-                        },
-                        refresh=True,
-                        expiry=timedelta(days=REFRESH_TOKEN_EXPIRY),
-                        role="admin"
-                    )
-
-                    return JSONResponse(
-                        content={
-                            "messages": "Đăng nhập thành công",
-                            "access_token": access_token,
-                            "refresh_token": refresh_token,
-                            "user": {
-                                "email": user.email,
-                                "id": str(user.id)
-                            }
-                        }
-                    )
-
-                AuthException.unauthorized()
-
+        if not user.is_verified:
             AuthException.user_not_verified()
 
-        AuthException.invalid_account()
+        if not user.is_admin:
+            AuthException.unauthorized()
+
+        token = create_url_safe_token({"id": str(user.id)}, role='admin', purpose='first_class_login')
+
+        if not user.two_fa_secret or not user.two_fa_enabled:
+            return JSONResponse(
+                content={
+                    "message": "Lần đăng nhập đầu tiên, vui lòng quét QR",
+                    "content": {
+                        "isFirstLogin": True,
+                        "token": token,
+                    }
+                }
+            )
+        else:
+            return JSONResponse(
+                content={
+                    "message": "Lần đăng nhập đầu tiên, vui lòng quét QR",
+                    "content": {
+                        "isFirstLogin": False,
+                        "token": token,
+                    }
+                }
+            )
+
+
+    async def setup_2fa(self, user_data: Setup2FA, session: AsyncSession):
+        token_data = decode_url_safe_token(user_data.token, role='admin', purpose="first_class_login")
+
+        user_id = token_data.get("id")
+        if not user_id:
+            AuthException.token_invalid()
+
+        condition = and_(User.id == user_id)
+        user = await user_repository.get_user(condition, session)
+        if not user:
+            AuthException.invalid_account()
+
+        secret = pyotp.random_base32()
+        user.two_fa_secret = secret
+        user.two_fa_enabled = True
+        await session.commit()
+
+        issuer = "E-Commerce"
+        otp_url = pyotp.totp.TOTP(secret).provisioning_uri(name=user.email, issuer_name=issuer)
+        qr = qrcode.make(otp_url)
+
+        buffered = BytesIO()
+        qr.save(buffered, format="PNG")
+        qr.save("user_qr.png")
+        qr_base64 = base64.b64encode(buffered.getvalue()).decode("utf-8")
+
+        return JSONResponse(
+            content={
+                "message": "Lần đăng nhập đầu tiên - vui lòng quét QR với Google Authenticator",
+                "content": {
+                    "qr_code_base64": qr_base64,
+                }
+            }
+        )
+
+
+    async def verify_login_admin_service(self, user_data: VerifyLoginAdminModel, session: AsyncSession):
+        token_data = decode_url_safe_token(user_data.token, role='admin', purpose="first_class_login")
+
+        user_id = token_data.get("id")
+        if not user_id:
+            AuthException.token_invalid()
+
+        condition = and_(User.id == user_id)
+        user = await user_repository.get_user(condition, session)
+        if not user:
+            AuthException.invalid_account()
+
+        if not user_data.otp:
+            AuthException.otp_required()
+
+        totp = pyotp.TOTP(user.two_fa_secret)
+
+        if not totp.verify(user_data.otp):
+            AuthException.invalid_otp()
+
+        access_token = create_access_token(
+            user_data={
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "id": str(user.id)
+            },
+            role="admin"
+        )
+
+        refresh_token = create_access_token(
+            user_data={
+                "first_name": user.first_name,
+                "last_name": user.last_name,
+                "id": str(user.id)
+            },
+            refresh=True,
+            expiry=timedelta(days=REFRESH_TOKEN_EXPIRY),
+            role="admin"
+        )
+
+        return JSONResponse(
+            content={
+                "message": "Đăng nhập thành công",
+                "content": {
+                    "access_token": access_token,
+                    "refresh_token": refresh_token,
+                    "user": {
+                        "email": user.email,
+                        "id": str(user.id)
+                    }
+                }
+            }
+        )
 
 
     async def login_customer_service(self, user_data: UserLoginModel, session: AsyncSession):
@@ -146,15 +191,18 @@ class AuthenticationService:
 
                     return JSONResponse(
                         content={
-                            "messages": "Đăng nhập thành công",
-                            "access_token": access_token,
-                            "refresh_token": refresh_token,
-                            "user": {
-                                "email": user.email,
-                                "id": str(user.id)
+                            "message": "Đăng nhập thành công",
+                            "content": {
+                                "access_token": access_token,
+                                "refresh_token": refresh_token,
+                                "user": {
+                                    "email": user.email,
+                                    "id": str(user.id)
+                                }
                             }
                         }
                     )
+
                 AuthException.unauthorized()
 
             AuthException.user_not_verified()
@@ -171,8 +219,8 @@ class AuthenticationService:
         check = check.lower()
 
         if check == "email":
-            token = create_url_safe_token({"email": email}, role)
-            link = f"http://{Config.DOMAIN}/api/v1/{role}/auth/forgot-password/{token}"
+            token = create_url_safe_token({"email": email}, role, purpose="reset_password")
+            link = f"http://{Config.DOMAIN_CLIENT}/reset-password/{token}"
             html_message = f"""
                 <h1>Đổi mật khẩu của bạn</h1>
                 <p>Hãy nhấp vào đường link này: <a href="{link}">link</a> để thay đổi mật khẩu của bạn</p>
@@ -210,9 +258,9 @@ class AuthenticationService:
         return response_message
 
 
-    async def forgot_password_confirm_service(self, data, token: str, role: str,
+    async def forgot_password_confirm_service(self, data, role: str,
                                             session: AsyncSession):
-        token_data = decode_url_safe_token(token, role)
+        token_data = decode_url_safe_token(data.token, role, purpose="reset_password")
 
         user_email = token_data.get("email")
         if not user_email:
@@ -245,6 +293,6 @@ class AuthenticationService:
         user.otp = None
         user.expires_at = None
 
-        token = create_url_safe_token({"email": data.email}, role)
+        token = create_url_safe_token({"email": data.email}, role, purpose='reset_password')
 
         return token

@@ -121,3 +121,13 @@ class AuthException:
                 "error_code": "auth_012",
             },
         )
+
+    @staticmethod
+    def invalid_password():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail={
+                "message": "Mật khẩu cũ không đúng",
+                "error_code": "auth_013",
+            },
+        )
