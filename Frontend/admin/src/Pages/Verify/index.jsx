@@ -19,15 +19,24 @@ const Verify = () => {
     const [qrCodeBase64, setQrCodeBase64] = useState("");
     const [isShowQR, setIsShowQR] = useState(false);
     const [isCheckingToken, setIsCheckingToken] = useState(true)
+    const [shouldNavigate, setShouldNavigate] = useState(false);
     const navigate = useNavigate()
     const [token, setToken] = useState("")
     const context = useContext(MyContext)
 
     useEffect(() => {
+        if (shouldNavigate) {
+            navigate('/', { replace: true });
+            setShouldNavigate(false);
+        }
+    }, [shouldNavigate, navigate]);
+
+    useEffect(() => {
         (async () => {
-            const accessToken = sessionStorage.getItem("accesstoken");
+            const accessToken = localStorage.getItem("accesstoken");
             if (accessToken) {
                 navigate("/")
+                return
             }
 
             const loginToken = sessionStorage.getItem("loginToken");
@@ -63,24 +72,23 @@ const Verify = () => {
             otp
         });
 
-        console.log(response);
-
         if (response?.success === true) {
 
             localStorage.setItem("accesstoken", response?.data?.access_token);
             localStorage.setItem("refreshtoken", response?.data?.refresh_token);
+
+            await context.checkLogin()
+
             context.openAlertBox("success", "Xác thực OTP thành công");
 
             sessionStorage.removeItem("isFirstLogin")
             sessionStorage.removeItem("loginToken")
 
-            navigate('/');
+            setShouldNavigate(true);
         } else {
-            console.log(response?.detail?.message);
-            context.openAlertBox("error", response?.detail.message)
+            setIsLoading(false);
+            context.openAlertBox("error", response?.data?.detail.message)
         }
-
-        setIsLoading(false);
     }
 
     if (isCheckingToken) return null;

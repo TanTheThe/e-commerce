@@ -1,5 +1,5 @@
 import Button from "@mui/material/Button";
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { CgLogIn } from "react-icons/cg";
 import { FaEyeSlash, FaRegEye, FaRegUser } from "react-icons/fa";
 import { FcGoogle } from "react-icons/fc";
@@ -41,6 +41,13 @@ const Login = () => {
         })
     }
 
+    useEffect(() => {
+        const accessToken = localStorage.getItem("accesstoken");
+        if (accessToken) {
+            history("/")
+        }
+    }, []);
+
     const handleSubmit = async (e) => {
         e.preventDefault()
 
@@ -68,7 +75,7 @@ const Login = () => {
             history("/verify")
         } else {
             setIsLoading(false)
-            context.openAlertBox("error", response?.detail?.message)
+            context.openAlertBox("error", response?.data?.detail?.message)
         }
     }
 

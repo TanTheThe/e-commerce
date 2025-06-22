@@ -73,7 +73,6 @@ async def get_profile_customer(token_details: dict = Depends(access_token_bearer
         }
     )
 
-
 @user_admin_router.put('/{id}', dependencies=[Depends(admin_role_middleware)])
 async def update_status_by_admin(id: str, user_update_data: AdminUpdateModel,
                                  token_details: dict = Depends(access_token_bearer),
@@ -105,7 +104,7 @@ async def get_detail_by_admin(id: str, token_details: dict = Depends(access_toke
     )
 
 
-@user_admin_router.get('/', dependencies=[Depends(admin_role_middleware)])
+@user_admin_router.get('/all', dependencies=[Depends(admin_role_middleware)])
 async def get_all_customer(token_details: dict = Depends(access_token_bearer),
                            session: AsyncSession = Depends(get_session)):
     filtered_users = await user_service.get_all_customer_service(session)
@@ -118,6 +117,19 @@ async def get_all_customer(token_details: dict = Depends(access_token_bearer),
         }
     )
 
+@user_admin_router.get('/', dependencies=[Depends(admin_role_middleware)])
+async def get_profile_admin(token_details: dict = Depends(access_token_bearer),
+                           session: AsyncSession = Depends(get_session)):
+    user_id = token_details['user']['id']
+    filtered_user = await user_service.get_profile_admin_service(user_id, session)
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "message": "Thông tin người dùng",
+            "content": filtered_user
+        }
+    )
 
 @user_customer_router.put('/change-password', dependencies=[Depends(customer_role_middleware)])
 async def change_password_customer(passwords: ChangePasswordModel, session: AsyncSession = Depends(get_session),

@@ -7,16 +7,6 @@ import { CardContent, Card } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
 const Verify = () => {
-    const [otp, setOtp] = useState("")
-    const handleOtpChange = (value) => {
-        setOtp(value)
-    }
-
-    const verifyOTP = (e) => {
-        e.preventDefault()
-        alert(otp)
-    }
-
     const navigate = useNavigate();
 
     return (

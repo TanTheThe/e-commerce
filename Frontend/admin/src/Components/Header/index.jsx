@@ -11,6 +11,9 @@ import Divider from '@mui/material/Divider';
 import { IoMdLogOut } from "react-icons/io";
 import { MyContext } from "../../App";
 import { AiOutlineMenuFold, AiOutlineMenuUnfold } from "react-icons/ai";
+import { fetchWithAutoRefresh } from "../../utils/api";
+import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
     '& .MuiBadge-badge': {
@@ -24,6 +27,8 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Header = () => {
     const [anchorMyAcc, setAnchorMyAcc] = useState(null);
     const openMyAcc = Boolean(anchorMyAcc);
+    const context = useContext(MyContext)
+    const navigate = useNavigate()
     const handleClickMyAcc = (event) => {
         setAnchorMyAcc(event.currentTarget);
     };
@@ -31,7 +36,29 @@ const Header = () => {
         setAnchorMyAcc(null);
     };
 
-    const context = useContext(MyContext)
+    const logout = async () => {
+        setAnchorMyAcc(null)
+
+        const response = await fetchWithAutoRefresh("/admin/auth/logout", "GET")
+
+        if (response?.success === true) {
+            localStorage.clear();
+            sessionStorage.clear();
+
+            context.setIsLogin(false);
+            context.setUserData(null);
+
+            navigate("/login");
+        } else {
+            context.openAlertBox("error", response?.data?.detail.message)
+
+            localStorage.clear();
+            sessionStorage.clear();
+            context.setIsLogin(false);
+            context.setUserData(null);
+            navigate("/login");
+        }
+    }
     return (
         <header className={`w-full h-[auto] py-2 ${context.isSidebarOpen === true ? 'pl-72' : 'pl-5'} pr-5 shadow-md bg-[#fff] flex items-center justify-between transition-all`}>
             <div className="part1">
@@ -103,27 +130,29 @@ const Header = () => {
                                     </div>
 
                                     <div className="info">
-                                        <h3 className="text-[15px] font-[500] leading-5">Angelina Gotelli</h3>
-                                        <p className="text-[12px] font-[400] opacity-70">the63574@gmail.com</p>
+                                        <h3 className="text-[15px] font-[500] leading-5">{context?.userData.first_name} {context?.userData.last_name}</h3>
+                                        <p className="text-[12px] font-[400] opacity-70">{context?.userData.email}</p>
                                     </div>
                                 </div>
                             </MenuItem>
 
                             <Divider />
 
-                            <MenuItem onClick={handleCloseMyAcc} className="flex items-center gap-3">
-                                <FaRegUser className="text-[16px]" />
-                                <span className="text-[14px]">Profile</span>
-                            </MenuItem>
+                            <Link to="/profile">
+                                <MenuItem onClick={handleCloseMyAcc} className="flex items-center gap-3">
+                                    <FaRegUser className="text-[16px]" />
+                                    <span className="text-[14px]">Profile</span>
+                                </MenuItem>
+                            </Link>
 
-                            <MenuItem onClick={handleCloseMyAcc} className="flex items-center gap-3">
+                            <MenuItem onClick={logout} className="flex items-center gap-3">
                                 <IoMdLogOut className="text-[18px]" />
                                 <span className="text-[14px]">Sign Out</span>
                             </MenuItem>
                         </Menu>
                     </div>
-                    :
-                    <Button className="btn-blue btn-sm !rounded-full">Sign In</Button>
+                        :
+                        <Button className="btn-blue btn-sm !rounded-full">Sign In</Button>
                 }
 
 

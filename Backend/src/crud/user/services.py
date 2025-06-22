@@ -72,6 +72,23 @@ class UserService:
         return filtered_user
 
 
+    async def get_profile_admin_service(self, id: str, session: AsyncSession):
+        condition = and_(User.id == id)
+        user = await user_repository.get_user(condition, session=session)
+
+        if not user:
+            AuthException.user_not_found()
+
+        filtered_user = {
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "phone": user.phone
+        }
+
+        return filtered_user
+
+
     async def update_profile_service(self, user_id: str, update_data, session: AsyncSession):
         condition = and_(User.id == user_id)
         user_need_update = await user_repository.get_user(condition, session)

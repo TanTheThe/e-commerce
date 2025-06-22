@@ -55,7 +55,7 @@ class AuthenticationService:
         else:
             return JSONResponse(
                 content={
-                    "message": "Lần đăng nhập đầu tiên, vui lòng quét QR",
+                    "message": "Chuyển sang trang quét QR",
                     "content": {
                         "isFirstLogin": False,
                         "token": token,
@@ -147,7 +147,6 @@ class AuthenticationService:
                     "access_token": access_token,
                     "refresh_token": refresh_token,
                     "user": {
-                        "email": user.email,
                         "id": str(user.id)
                     }
                 }
@@ -196,7 +195,6 @@ class AuthenticationService:
                                 "access_token": access_token,
                                 "refresh_token": refresh_token,
                                 "user": {
-                                    "email": user.email,
                                     "id": str(user.id)
                                 }
                             }

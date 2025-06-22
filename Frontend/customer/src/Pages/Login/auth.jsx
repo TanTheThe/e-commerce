@@ -40,7 +40,7 @@ const useAuth = () => {
         userData,
         setUserData,
         isLoading,
-        checkLogin 
+        checkLogin
     };
 };
 

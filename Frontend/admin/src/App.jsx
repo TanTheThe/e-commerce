@@ -32,6 +32,12 @@ import Orders from './Pages/Orders'
 import Verify from './Pages/Verify'
 import toast, {Toaster} from 'react-hot-toast'
 import ForgotPassword from './Pages/ForgotPassword'
+import ResetPasswordEmail from './Pages/ResetPasswordEmail'
+import ResetPasswordOtp from './Pages/ResetPasswordOtp'
+import SendEmailGetOtp from './Pages/SendEmailGetOtp'
+import ResetPassword from './Pages/ResetPassword'
+import useAuth from './Pages/Verify/auth'
+import Profile from './Pages/Profile'
 
 const Transition = React.forwardRef(function Transition(
   props, ref) {
@@ -41,8 +47,9 @@ const Transition = React.forwardRef(function Transition(
 const MyContext = createContext()
 
 function App() {
-  const [isLogin, setIsLogin] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(true)
+
+  const { isLogin, setIsLogin, userData, setUserData, isLoading, checkLogin } = useAuth();
 
   const [isOpenFullScreenPanel, setIsOpenFullScreenPanel] = useState({
     open: false,
@@ -102,6 +109,42 @@ function App() {
       element: (
         <>
           <ForgotPassword />
+        </>
+      )
+    },
+    {
+      path: "/forgot-password-email",
+      exact: true,
+      element: (
+        <>
+          <ResetPasswordEmail />
+        </>
+      )
+    },
+    {
+      path: "/forgot-password-otp",
+      exact: true,
+      element: (
+        <>
+          <ResetPasswordOtp />
+        </>
+      )
+    },
+    {
+      path: "/send-mail",
+      exact: true,
+      element: (
+        <>
+          <SendEmailGetOtp />
+        </>
+      )
+    },
+    {
+      path: "/reset-password/:token",
+      exact: true,
+      element: (
+        <>
+          <ResetPassword />
         </>
       )
     },
@@ -219,6 +262,25 @@ function App() {
         </>
       )
     },
+    {
+      path: "/profile",
+      exact: true,
+      element: (
+        <>
+          <section className='main'>
+            <Header />
+            <div className='contentMain flex'>
+              <div className={`overflow-hidden sidebarWrapper ${isSidebarOpen === true ? 'w-[15%]' : 'w-[0px] opacity-0'} transition-all`}>
+                <Sidebar />
+              </div>
+              <div className={`contentRight py-4 px-5 ${isSidebarOpen === false ? 'w-[100%]' : 'w-[85%]'} transition-all`}>
+                <Profile />
+              </div>
+            </div>
+          </section>
+        </>
+      )
+    },
   ])
 
   const openAlertBox = (status, msg) => {
@@ -237,7 +299,11 @@ function App() {
     setIsLogin,
     isOpenFullScreenPanel,
     setIsOpenFullScreenPanel,
-    openAlertBox
+    openAlertBox,
+    userData, 
+    setUserData, 
+    isLoading, 
+    checkLogin
   }
 
   return (
