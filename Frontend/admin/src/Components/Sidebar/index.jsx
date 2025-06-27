@@ -7,12 +7,14 @@ import { IoBagCheckOutline } from "react-icons/io5";
 import { RiProductHuntLine } from "react-icons/ri";
 import { RxDashboard } from "react-icons/rx";
 import { TbCategory } from "react-icons/tb";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Collapse } from 'react-collapse';
 import { MyContext } from "../../App";
+import AddCategory from "../../Pages/Category/addCategory";
 
 const Sidebar = () => {
     const [submenuIndex, setSubmenuIndex] = useState(null)
+    const [isOpen, setIsOpen] = useState(false);
     const isOpenSubMenu = (index) => {
         if (submenuIndex === index) {
             setSubmenuIndex(null)
@@ -22,6 +24,16 @@ const Sidebar = () => {
     }
 
     const context = useContext(MyContext)
+    const navigate = useNavigate()
+
+    const checkLogin = () => {
+        const token = localStorage.getItem("accesstoken");
+        if (!token) {
+            navigate("/login");
+            return false;
+        }
+        return true;
+    }
 
     return (
         <>
@@ -114,22 +126,23 @@ const Sidebar = () => {
                         <Collapse isOpened={submenuIndex === 4 ? true : false}>
                             <ul className="w-full">
                                 <li className="w-full">
-                                    <Link to="/category/list">
-                                        <Button className="!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !pl-9 flex gap-3">
-                                            <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.1)]"></span>
-                                            Category List</Button>
-                                    </Link>
+                                    <Button className="!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !pl-9 flex gap-3"
+                                        onClick={() => {
+                                            if (checkLogin()) navigate("/category/list");
+                                        }}>
+                                        <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.1)]"></span>
+                                        Danh sách danh mục</Button>
                                 </li>
                                 <li className="w-full">
                                     <Button className="!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !pl-9 flex gap-3"
-                                        onClick={() => context.setIsOpenFullScreenPanel({
-                                            open: true,
-                                            model: 'Add New Category'
-                                        })}>
+                                        onClick={() => {
+                                            if (checkLogin()) setIsOpen(true);
+                                        }}>
                                         <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.1)]"></span>
-                                        Add a Category</Button>
+                                        Tạo danh mục</Button>
+                                    <AddCategory open={isOpen} onClose={() => setIsOpen(false)} />
                                 </li>
-                                <li className="w-full">
+                                {/* <li className="w-full">
                                     <Link to="/subCategory/list">
                                         <Button className="!text-[rgba(0,0,0,0.8)] !capitalize !justify-start !w-full !text-[13px] !pl-9 flex gap-3">
                                             <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.1)]"></span>
@@ -144,7 +157,7 @@ const Sidebar = () => {
                                         })}>
                                         <span className="block w-[5px] h-[5px] rounded-full bg-[rgba(0,0,0,0.1)]"></span>
                                         Add a Sub Category</Button>
-                                </li>
+                                </li> */}
                             </ul>
                         </Collapse>
                     </li>
@@ -163,7 +176,7 @@ const Sidebar = () => {
                         </Button>
                     </li>
                 </ul>
-            </div>
+            </div >
         </>
     )
 }

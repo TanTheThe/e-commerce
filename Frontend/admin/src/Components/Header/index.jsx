@@ -130,8 +130,12 @@ const Header = () => {
                                     </div>
 
                                     <div className="info">
-                                        <h3 className="text-[15px] font-[500] leading-5">{context?.userData.first_name} {context?.userData.last_name}</h3>
-                                        <p className="text-[12px] font-[400] opacity-70">{context?.userData.email}</p>
+                                        <h3 className="text-[15px] font-[500] leading-5">
+                                            {context?.userData?.content?.first_name || context?.userData?.first_name} {context?.userData?.content?.last_name || context?.userData?.last_name}
+                                        </h3>
+                                        <p className="text-[12px] font-[400] opacity-70">
+                                            {context?.userData?.content?.email || context?.userData?.email}
+                                        </p>
                                     </div>
                                 </div>
                             </MenuItem>
@@ -152,7 +156,7 @@ const Header = () => {
                         </Menu>
                     </div>
                         :
-                        <Button className="btn-blue btn-sm !rounded-full">Sign In</Button>
+                        <Button className="btn-blue btn-sm !rounded-full" onClick={() => navigate("/login")}>Sign In</Button>
                 }
 
 

@@ -1,63 +1,190 @@
-import React from "react";
+import React, { useContext, useEffect, useState } from "react";
 import UploadBox from "../../Components/UploadBox";
 import { LazyLoadImage } from "react-lazy-load-image-component";
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { IoMdClose } from "react-icons/io";
 import Button from "@mui/material/Button";
-import { FaCloudUploadAlt } from "react-icons/fa";
+import { FaCloudUploadAlt, FaPlus } from "react-icons/fa";
+import { postDataApi } from "../../utils/api";
+import { MyContext } from "../../App";
+import Dialog from '@mui/material/Dialog';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogContent from '@mui/material/DialogContent';
+import IconButton from '@mui/material/IconButton';
 
-const AddCategory = () => {
+const AddCategory = ({ open, onClose, onSuccess }) => {
+    const [formFields, setFormFields] = useState({
+        name: "",
+        image: ""
+    });
+
+    const context = useContext(MyContext)
+
+    const [imagePreview, setImagePreview] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+
+    const onChangeInput = (e) => {
+        const { name, value } = e.target;
+        setFormFields(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const convertToBase64 = (file) => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve(reader.result);
+            reader.onerror = error => reject(error);
+        });
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+
+        if (file) {
+            try {
+                const previewUrl = URL.createObjectURL(file);
+
+                const base64 = await convertToBase64(file);
+
+                setImagePreview({
+                    url: previewUrl,
+                    file: file,
+                    name: file.name
+                });
+
+                setFormFields(prev => ({
+                    ...prev,
+                    image: base64
+                }));
+            } catch (error) {
+                console.error("Error uploading image:", error);
+                context.openAlertBox("error", "Có lỗi xảy ra trong quá trình upload ảnh")
+            }
+        }
+    };
+
+    const removeImage = () => {
+        if (imagePreview) {
+            URL.revokeObjectURL(imagePreview.url);
+
+            setImagePreview(null);
+            setFormFields(prev => ({
+                ...prev,
+                image: ""
+            }));
+        }
+    };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        if (!formFields.name.trim()) {
+            context.openAlertBox("error", "Vui lòng nhập tên danh mục!")
+            return;
+        }
+
+        if (!formFields.image) {
+            context.openAlertBox("error", "Vui lòng chọn một hình ảnh!")
+            return;
+        }
+
+        setIsSubmitting(true);
+        try {
+            const categoryData = {
+                name: formFields.name.trim(),
+                image: formFields.image
+            };
+
+            const response = await postDataApi('/admin/categories', categoryData);
+
+            if (response.success) {
+                context.openAlertBox(
+                    "success", response?.message
+                )
+                onSuccess && onSuccess();
+            } else {
+                context.openAlertBox("error", response?.data?.detail?.message)
+            }
+
+            setFormFields({ name: "", image: "" });
+            if (imagePreview) {
+                URL.revokeObjectURL(imagePreview.url);
+            }
+            setImagePreview(null);
+
+        } catch (error) {
+            console.error("Error submitting form:", error);
+            context.openAlertBox("error", "Có lỗi xảy ra khi tạo danh mục!")
+        }
+        setIsSubmitting(false);
+    };
+
+    useEffect(() => {
+        return () => {
+            if (imagePreview?.url) {
+                URL.revokeObjectURL(imagePreview.url);
+            }
+        };
+    }, [imagePreview]);
+
     return (
-        <section className="p-5 bg-gray-50">
-            <form className="form py-3 p-8 ">
-                <div className="scroll max-h-[70vh] pr-4 overflow-y-scroll pt-4">
-                    <div className="grid grid-cols-1 mb-3">
-                        <div className="col w-[25%]">
-                            <h3 className="text-[14px] font-[500] mb-1">Category Name</h3>
-                            <input type="text" className="w-full h-[40px] border border-[rgba(0,0,0,0.2)] focus:outline-none focus:border-[rgba(0,0,0,0.4)] rounded-sm
-                        p-3 text-sm"/>
-                        </div>
+        <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+            <DialogTitle>
+                Tạo danh mục mới
+                <IconButton onClick={onClose} style={{ float: 'right' }}>
+                    <IoMdClose />
+                </IconButton>
+            </DialogTitle>
+            <DialogContent>
+                <form onSubmit={handleSubmit}>
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium mb-1">Tên danh mục</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={formFields.name}
+                            onChange={onChangeInput}
+                            className="w-full border p-2 rounded"
+                            placeholder="Nhập tên danh mục..."
+                            required
+                        />
                     </div>
 
-                    <br/>
-
-                    <h3 className="text-[18px] font-[500] mb-4">Category Image</h3>
-
-                    <div className="grid grid-cols-7 gap-4">
-                        <div className="uploadBoxWrapper relative">
-                            <span className="absolute w-[20px] h-[20px] rounded-full overflow-hidden bg-red-700 -top-[10px] -right-[10px] flex
-                                                items-center justify-center z-50 cursor-pointer">
-                                <IoMdClose className="text-white text-[17px]" />
-                            </span>
-
-                            <div className="uploadBox p-0 rounded-md overflow-hidden border border-dashed border-[rgba(0,0,0,0.3)] h-[150px] w-[100%] bg-gray-100 cursor-pointer hover:bg-gray-200 flex items-center justify-center 
-                                                flex-col relative">
-                                <LazyLoadImage
-                                    className="w-full h-full object-cover"
-                                    alt={"image"}
-                                    src={"https://isomorphic-furyroad.s3.amazonaws.com/public/products/modern/7.webp"}
-                                    effect="blur"
-                                    wrapperProps={{
-                                        style: { transitionDelay: "1s" },
-                                    }}
-                                />
+                    <div className="mb-4">
+                        <label className="block text-sm font-medium mb-2">Ảnh danh mục</label>
+                        {imagePreview ? (
+                            <div className="relative w-full h-[150px] border rounded overflow-hidden">
+                                <LazyLoadImage src={imagePreview.url} alt={imagePreview.name} className="object-cover w-full h-full" effect="blur" />
+                                <span onClick={removeImage} className="absolute top-1 right-1 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center cursor-pointer">
+                                    <IoMdClose />
+                                </span>
                             </div>
-                        </div>
-
-                        <UploadBox multiple={true} />
+                        ) : (
+                            <div className="border-dashed border h-[150px] flex items-center justify-center bg-gray-100 rounded relative">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleImageUpload}
+                                    className="absolute inset-0 opacity-0 z-10 cursor-pointer"
+                                    id="imageUpload"
+                                />
+                                <label htmlFor="imageUpload" className="text-center text-gray-500">
+                                    <FaPlus className="mx-auto mb-2 text-xl" />
+                                    Thêm ảnh
+                                </label>
+                            </div>
+                        )}
                     </div>
-                </div>
 
-                <br />
-                <br />
-                <div className="w-[250px]">
-                    <Button type="button" className="btn-blue btn-lg w-full flex gap-2">
-                        <FaCloudUploadAlt className="text-[25px] text-white" />
-                        Publish and View
+                    <Button type="submit" disabled={isSubmitting} variant="contained" fullWidth>
+                        {isSubmitting ? "Đang đăng..." : "Tạo danh mục"}
                     </Button>
-                </div>
-            </form>
-        </section>
+                </form>
+            </DialogContent>
+        </Dialog>
     )
 }
 
